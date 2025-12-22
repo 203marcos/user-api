@@ -1,5 +1,6 @@
 package com.desafio2.demo2.service;
 
+import com.desafio2.demo2.exception.UserNotFoundException;
 import com.desafio2.demo2.model.User;
 import com.desafio2.demo2.repository.UserRepository;
 import org.springframework.stereotype.Service;
@@ -25,12 +26,15 @@ public class UserService {
 
     public User findById(Long id) {
         return repository.findById(id)
-                .orElseThrow(() ->
-                        new RuntimeException("User not found"));
+                .orElseThrow(() -> new UserNotFoundException(id));
     }
 
     public void delete(Long id) {
-        repository.delete(id);
+        if (!repository.existsById(id)) {
+            throw new UserNotFoundException(id);
+        }
+        repository.deleteById(id);
     }
+
 }
 
