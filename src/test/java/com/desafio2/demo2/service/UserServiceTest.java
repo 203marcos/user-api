@@ -55,22 +55,26 @@ class UserServiceTest {
 
     @Test
     void shouldDeleteUserWhenExists() {
-        Long userId = Long.valueOf(1);
+        Long userId = 1L;
+        User found = new User("Marcos", "marcos@email.com");
+        found.setId(userId);
 
-        when(repository.existsById(userId)).thenReturn(true);
+        when(repository.findById(userId)).thenReturn(Optional.of(found));
 
         service.delete(userId);
 
-        verify(repository).deleteById(userId);
+        verify(repository).delete(found);
     }
 
     @Test
     void shouldThrowExceptionWhenDeletingNonExistingUser() {
-        Long userId = Long.valueOf(2);
+        Long userId = 2L;
 
-        when(repository.existsById(userId)).thenReturn(false);
+        when(repository.findById(userId)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> service.delete(userId))
                 .isInstanceOf(UserNotFoundException.class);
     }
+
+    
 }
