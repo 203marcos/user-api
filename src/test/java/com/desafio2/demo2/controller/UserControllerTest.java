@@ -45,7 +45,7 @@ class UserControllerTest {
         mockMvc.perform(post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk())
+                .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id", is(1)))
                 .andExpect(jsonPath("$.name", is("Marcos")));
     }
@@ -98,8 +98,19 @@ class UserControllerTest {
         doNothing().when(service).delete(userId);
 
         mockMvc.perform(delete("/users/1"))
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent()); 
 
         verify(service).delete(userId);
+    }
+
+    @Test
+    void shouldReturn400WhenValidationFails() throws Exception {
+        UserRequestDTO invalid = new UserRequestDTO("", "not-email");
+
+        mockMvc.perform(post("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(invalid)))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string(containsString("email")));
     }
 }
