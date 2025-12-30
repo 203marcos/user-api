@@ -1,5 +1,7 @@
 package com.desafio2.demo2.controller;
 
+import com.desafio2.demo2.dto.UserRequestDTO;
+import com.desafio2.demo2.dto.UserResponseDTO;
 import com.desafio2.demo2.model.User;
 import com.desafio2.demo2.service.UserService;
 import org.springframework.web.bind.annotation.*;
@@ -17,17 +19,17 @@ public class UserController {
     }
 
     @PostMapping
-    public User create(@RequestBody User user) {
-        return service.create(user);
+    public UserResponseDTO create(@RequestBody UserRequestDTO dto) {
+        return service.create(dto);
     }
 
     @GetMapping
-    public List<User> list() {
+    public List<UserResponseDTO> list() {
         return service.findAll();
     }
 
     @GetMapping("/{id}")
-    public User findById(@PathVariable Long id) {
+    public UserResponseDTO findById(@PathVariable Long id) {
         return service.findById(id);
     }
 
@@ -36,4 +38,5 @@ public class UserController {
         service.delete(id);
     }
 }
+
 

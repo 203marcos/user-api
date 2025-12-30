@@ -1,7 +1,8 @@
 package com.desafio2.demo2.controller;
 
+import com.desafio2.demo2.dto.UserRequestDTO;
+import com.desafio2.demo2.dto.UserResponseDTO;
 import com.desafio2.demo2.exception.UserNotFoundException;
-import com.desafio2.demo2.model.User;
 import com.desafio2.demo2.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
@@ -11,11 +12,15 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.List;
+
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(UserController.class)
+@WebMvcTest
 class UserControllerTest {
 
     @Autowired
@@ -29,38 +34,57 @@ class UserControllerTest {
 
     @Test
     void shouldCreateUser() throws Exception {
-        User user = new User();
-        user.setId(1L);
-        user.setName("Marcos");
-        user.setEmail("marcos@email.com");
+        UserRequestDTO request = new UserRequestDTO();
+        request.setName("Marcos");
+        request.setEmail("marcos@email.com");
+        Long userId = Long.valueOf(1);
+        UserResponseDTO response = new UserResponseDTO(userId, "Marcos", "marcos@email.com");
 
-        when(service.create(any(User.class))).thenReturn(user);
+        when(service.create(any(UserRequestDTO.class))).thenReturn(response);
 
         mockMvc.perform(post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(user)))
+                        .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(1L))
-                .andExpect(jsonPath("$.name").value("Marcos"));
+                .andExpect(jsonPath("$.id", is(1)))
+                .andExpect(jsonPath("$.name", is("Marcos")));
     }
 
     @Test
     void shouldReturnUserById() throws Exception {
-        User user = new User();
-        user.setId(1L);
-        user.setName("Marcos");
+        Long userId = (Long) 1L;
+        UserResponseDTO response = new UserResponseDTO(userId, "Marcos", "marcos@email.com");
 
-        when(service.findById(1L)).thenReturn(user);
+        when(service.findById(userId)).thenReturn(response);
 
         mockMvc.perform(get("/users/1"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.name").value("Marcos"));
+                .andExpect(jsonPath("$.id", is(1)))
+                .andExpect(jsonPath("$.name", is("Marcos")));
+    }
+
+    @Test
+    void shouldReturnAllUsers() throws Exception {
+        Long userId = Long.valueOf(1);
+        Long userId2 = Long.valueOf(2);
+        UserResponseDTO user1 = new UserResponseDTO(userId, "Marcos", "marcos@email.com");
+        UserResponseDTO user2 = new UserResponseDTO(userId2, "Ana", "ana@email.com");
+
+        when(service.findAll()).thenReturn(List.of(user1, user2));
+
+        mockMvc.perform(get("/users"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id", is(1)))
+                .andExpect(jsonPath("$[0].name", is("Marcos")))
+                .andExpect(jsonPath("$[1].id", is(2)))
+                .andExpect(jsonPath("$[1].name", is("Ana")));
     }
 
     @Test
     void shouldReturn404WhenUserNotFound() throws Exception {
-        when(service.findById(99L))
-                .thenThrow(new UserNotFoundException(99L));
+        Long userId = Long.valueOf(99);
+
+        when(service.findById(userId)).thenThrow(new UserNotFoundException(userId));
 
         mockMvc.perform(get("/users/99"))
                 .andExpect(status().isNotFound())
@@ -69,11 +93,13 @@ class UserControllerTest {
 
     @Test
     void shouldDeleteUser() throws Exception {
-        doNothing().when(service).delete(1L);
+        Long userId = Long.valueOf(1);
+
+        doNothing().when(service).delete(userId);
 
         mockMvc.perform(delete("/users/1"))
                 .andExpect(status().isOk());
 
-        verify(service).delete(1L);
+        verify(service).delete(userId);
     }
 }

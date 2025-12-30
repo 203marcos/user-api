@@ -1,5 +1,6 @@
 package com.desafio2.demo2.service;
 
+import com.desafio2.demo2.dto.UserResponseDTO;
 import com.desafio2.demo2.exception.UserNotFoundException;
 import com.desafio2.demo2.model.User;
 import com.desafio2.demo2.repository.UserRepository;
@@ -26,42 +27,50 @@ class UserServiceTest {
 
     @Test
     void shouldReturnUserWhenFoundById() {
+        Long userId = Long.valueOf(1);
         User user = new User();
-        user.setId(1L);
+        user.setId(userId);
         user.setName("Marcos");
+        user.setEmail("marcos@email.com");
 
-        when(repository.findById(1L))
-                .thenReturn(Optional.of(user));
+        when(repository.findById(userId)).thenReturn(Optional.of(user));
 
-        User result = service.findById(1L);
+        UserResponseDTO result = service.findById(userId);
 
+        assertThat(result.getId()).isEqualTo(userId);
         assertThat(result.getName()).isEqualTo("Marcos");
+        assertThat(result.getEmail()).isEqualTo("marcos@email.com");
     }
 
     @Test
     void shouldThrowExceptionWhenUserNotFound() {
-        when(repository.findById(99L))
-                .thenReturn(Optional.empty());
+        Long userId = Long.valueOf(99);
 
-        assertThatThrownBy(() -> service.findById(99L))
+        when(repository.findById(userId)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> service.findById(userId))
                 .isInstanceOf(UserNotFoundException.class)
                 .hasMessageContaining("99");
     }
 
     @Test
     void shouldDeleteUserWhenExists() {
-        when(repository.existsById(1L)).thenReturn(true);
+        Long userId = Long.valueOf(1);
 
-        service.delete(1L);
+        when(repository.existsById(userId)).thenReturn(true);
 
-        verify(repository).deleteById(1L);
+        service.delete(userId);
+
+        verify(repository).deleteById(userId);
     }
 
     @Test
     void shouldThrowExceptionWhenDeletingNonExistingUser() {
-        when(repository.existsById(2L)).thenReturn(false);
+        Long userId = Long.valueOf(2);
 
-        assertThatThrownBy(() -> service.delete(2L))
+        when(repository.existsById(userId)).thenReturn(false);
+
+        assertThatThrownBy(() -> service.delete(userId))
                 .isInstanceOf(UserNotFoundException.class);
     }
 }
