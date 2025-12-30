@@ -6,6 +6,8 @@ import com.desafio2.demo2.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -26,8 +28,9 @@ public class UserController {
             @ApiResponse(responseCode = "400", description = "Invalid input")
     })
     @PostMapping
-    public UserResponseDTO create(@RequestBody UserRequestDTO dto) {
-        return service.create(dto);
+    public ResponseEntity<UserResponseDTO> create(@RequestBody @Valid UserRequestDTO dto) {
+        UserResponseDTO created = service.create(dto);
+        return ResponseEntity.status(201).body(created);
     }
 
     @Operation(summary = "Get all users")
@@ -44,7 +47,8 @@ public class UserController {
 
     @Operation(summary = "Delete user by ID")
     @DeleteMapping("/{id}")
-    public void delete(@PathVariable Long id) {
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
         service.delete(id);
+        return ResponseEntity.noContent().build();
     }
 }
