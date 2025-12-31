@@ -1,226 +1,65 @@
 # User API
 
-[![Build Status](https://github.com/203marcos/user-api/workflows/CI/badge.svg)](https://github.com/203marcos/user-api/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-Production-ready REST API for managing users with Spring Boot 3.3, JPA, and PostgreSQL.
+A production-ready REST API for user management built with Spring Boot 3.3, PostgreSQL, and Docker.
 
-## 🚀 Quick Start
+## Getting Started
 
 ### Prerequisites
-- JDK 21+
-- Maven 3.8+
-- Docker & Docker Compose (optional, for PostgreSQL)
 
-### Run with Docker Compose (Recommended)
+- **JDK 21** or higher
+- **Maven 3.8** or higher
+- **Docker & Docker Compose**
+
+### Installation & Running
+
+The recommended way is using Docker Compose, which sets up both the PostgreSQL database and the Spring Boot application:
+
 ```bash
 git clone https://github.com/203marcos/user-api.git
 cd user-api
 mvn clean package
 docker-compose up
 ```
-API runs at: `http://localhost:8080`
 
-### Run Locally (PostgreSQL required)
+The API will be available at: **http://localhost:8080**
+
+#### What Happens with Docker Compose
+
+1. **PostgreSQL 15** container starts on port 5432
+2. **Spring Boot application** automatically waits for PostgreSQL to be ready
+3. **Flyway migrations** run automatically to create the database schema
+4. API is ready to accept requests
+
+### Running Locally (Without Docker)
+
+If you have PostgreSQL running locally on `localhost:5432`:
+
 ```bash
-# Make sure PostgreSQL is running on localhost:5432
 mvn clean spring-boot:run
 ```
 
-### Environment Variables
+Make sure to set the correct database credentials in `application.properties`.
 
-For production deployment, set these environment variables:
+## Database Configuration
 
-```bash
-export SPRING_DATASOURCE_URL=jdbc:postgresql://db-host:5432/userdb
-export SPRING_DATASOURCE_USERNAME=postgres
-export SPRING_DATASOURCE_PASSWORD=your-secure-password
-export SPRING_PROFILES_ACTIVE=prod
-export SPRING_JPA_HIBERNATE_DDL_AUTO=validate
+### PostgreSQL Connection
+
+By default, the application connects to PostgreSQL with these settings:
+
+```properties
+spring.datasource.url=jdbc:postgresql://localhost:5432/userdb
+spring.datasource.username=postgres
+spring.datasource.password=postgres
+spring.jpa.database-platform=org.hibernate.dialect.PostgreSQLDialect
 ```
 
-Or in Docker:
-```bash
-docker-compose -f docker-compose.yml up
-# Environment variables are already set in docker-compose.yml
-```
-
-## 📖 Using the API
-
-### Swagger UI (Interactive Documentation)
-```
-http://localhost:8080/swagger-ui.html
-```
-
-### Example Requests
-
-**Create User:**
-```bash
-curl -X POST http://localhost:8080/users \
-  -H "Content-Type: application/json" \
-  -d '{"name": "João Silva", "email": "joao@email.com"}'
-```
-
-**List Users:**
-```bash
-curl http://localhost:8080/users
-```
-
-**Get User by ID:**
-```bash
-curl http://localhost:8080/users/1
-```
-
-**Update User:**
-```bash
-curl -X PUT http://localhost:8080/users/1 \
-  -H "Content-Type: application/json" \
-  -d '{"name": "João Silva", "email": "joao.silva@email.com"}'
-```
-
-**Delete User:**
-```bash
-curl -X DELETE http://localhost:8080/users/1
-```
-
-### Response Examples
-
-**Success - Create User (201 Created):**
-```json
-{
-  "id": 1,
-  "name": "João Silva",
-  "email": "joao@email.com",
-  "createdAt": "2025-12-31T10:30:00",
-  "updatedAt": "2025-12-31T10:30:00"
-}
-```
-
-**Success - List Users (200 OK):**
-```json
-[
-  {
-    "id": 1,
-    "name": "João Silva",
-    "email": "joao@email.com",
-    "createdAt": "2025-12-31T10:30:00",
-    "updatedAt": "2025-12-31T10:30:00"
-  }
-]
-```
-
-**Error - Validation Error (400 Bad Request):**
-```json
-{
-  "status": 400,
-  "message": "Validation failed",
-  "errors": [
-    "Email must be valid",
-    "Name must not be empty"
-  ],
-  "timestamp": "2025-12-31T10:30:00"
-}
-```
-
-**Error - Not Found (404):**
-```json
-{
-  "status": 404,
-  "message": "User not found",
-  "timestamp": "2025-12-31T10:30:00"
-}
-```
-
-## 🧪 Testing
-
-Run all tests:
-```bash
-mvn clean test
-```
-
-Test coverage includes:
-- ✅ Repository (JPA) - `UserRepositoryTest`
-- ✅ Service (Unit) - `UserServiceTest`
-- ✅ Controller (Integration) - `UserControllerTest`
-- ✅ Application Context - `Demo2ApplicationTests`
-
-View coverage report:
-```bash
-mvn clean test jacoco:report
-# Open: target/site/jacoco/index.html
-```
-
-## 🏗️ Architecture
-
-```
-src/
-├── main/
-│   ├── java/com/desafio2/demo2/
-│   │   ├── Demo2Application.java          # Entry point
-│   │   ├── controller/UserController.java # REST endpoints
-│   │   ├── service/UserService.java       # Business logic
-│   │   ├── repository/UserRepository.java # Data access (JPA)
-│   │   ├── model/User.java                # Entity
-│   │   ├── dto/                           # DTOs (Request/Response)
-│   │   ├── exception/                     # Global error handling
-│   │   └── config/                        # Configuration
-│   └── resources/
-│       ├── application.properties         # Main config
-│       ├── application-test.properties    # Test config (H2)
-│       └── db/migration/                  # Flyway migrations
-└── test/
-    └── java/com/desafio2/demo2/           # All tests
-```
-
-## 🛠️ Tech Stack
-
-| Layer | Technology | Version |
-|-------|-----------|---------|
-| **Runtime** | Spring Boot | 3.3.0 |
-| **Web** | Spring Web | 3.3.0 |
-| **Database** | Spring Data JPA | 3.3.0 |
-| **ORM** | Hibernate | 6.x |
-| **DB Driver** | PostgreSQL | 42.x |
-| **Migrations** | Flyway | 9.x |
-| **Validation** | Bean Validation (Jakarta) | 3.x |
-| **Documentation** | Springdoc OpenAPI | 2.3.0 |
-| **Logging** | SLF4J + Logback | 2.x |
-| **Testing** | JUnit 5 + Mockito | 5.x |
-| **Code Coverage** | JaCoCo | 0.8.10 |
-| **Java** | Eclipse Temurin | 21 |
-| **Container** | Docker | Alpine |
-
-## ✅ Features Implemented
-
-- ✅ **CRUD API** - Create, Read, Update, Delete users
-- ✅ **Spring Boot 3.3** - Latest Spring Boot version
-- ✅ **PostgreSQL** - Production database
-- ✅ **Flyway** - Database migration versioning
-- ✅ **JPA/Hibernate** - Object-relational mapping
-- ✅ **Docker/Compose** - Containerization
-- ✅ **Global Exception Handling** - Centralized error handling
-- ✅ **Bean Validation** - Request validation
-- ✅ **Logging** - SLF4J with console output
-- ✅ **Swagger/OpenAPI** - Interactive API documentation
-- ✅ **Unit Tests** - 100% coverage with JUnit 5
-- ✅ **CI/CD** - GitHub Actions pipeline
-- ✅ **Profiles** - dev, test, prod configurations
-
-## 🚧 Roadmap (Coming Soon)
-
-- [ ] **Auditing** - Track createdAt/updatedAt
-- [ ] **Pagination** - GET /users?page=0&size=10&sort=name,asc
-- [ ] **PATCH** - Partial updates
-- [ ] **TestContainers** - Real PostgreSQL in tests
-- [ ] **Security** - JWT authentication
-- [ ] **Caching** - Redis integration
-- [ ] **OpenAPI** - Better API documentation
-
-## 📋 Database
+When using Docker Compose, these are automatically configured.
 
 ### Flyway Migrations
 
-Migrations are automatically applied on startup:
+Database schema is managed by Flyway. Migrations run automatically on startup:
 
 ```sql
 -- V1__Create_users_table.sql
@@ -233,103 +72,140 @@ CREATE TABLE users (
 );
 ```
 
-### H2 Console (Development Only)
+### Development with H2
 
-Access in-memory H2 database console:
+For testing without PostgreSQL, use H2 in-memory database:
+
+**Access H2 Console:** http://localhost:8080/h2-console
+- JDBC URL: `jdbc:h2:mem:testdb`
+- User: `sa`
+
+## API Documentation
+
+### Swagger UI
+
+Interactive API documentation is available at:
+
 ```
-URL: http://localhost:8080/h2-console
-JDBC URL: jdbc:h2:mem:testdb
-User: sa
+http://localhost:8080/swagger-ui.html
 ```
 
-## 📊 Profiles
+All endpoints (Create, Read, Update, Delete) can be tested directly from Swagger.
 
-- **default** - PostgreSQL local
-- **test** - H2 in-memory (tests only)
-- **prod** - Production configuration
+## Testing
 
-## 🔍 Monitoring
+### Run All Tests
 
-Check application health:
 ```bash
-# All endpoints
-curl http://localhost:8080/swagger-ui.html
-
-# Logs in Docker
-docker logs user-api
-
-# Database logs
-docker logs user-api-postgres
+mvn clean test
 ```
 
-## � Troubleshooting
+Tests use H2 in-memory database automatically.
 
-### Port 8080 already in use
+### View Code Coverage
+
 ```bash
-# Linux/Mac
+mvn clean test jacoco:report
+open target/site/jacoco/index.html
+```
+
+## Technology Stack
+
+| Layer | Technology | Version |
+|-------|-----------|---------|
+| **Framework** | Spring Boot | 3.3.0 |
+| **Database** | PostgreSQL | 15 |
+| **ORM** | Hibernate | 6.x |
+| **Migrations** | Flyway | 9.x |
+| **Container** | Docker | Latest |
+| **Java** | Eclipse Temurin | 21 |
+| **Testing** | JUnit 5 + Mockito | 5.x |
+| **API Docs** | Springdoc OpenAPI | 2.3.0 |
+
+## Project Features
+
+- **REST API** - Full CRUD operations for user management
+- **PostgreSQL** - Production-grade relational database
+- **Docker** - Containerized application and database
+- **Flyway** - Automated database schema versioning
+- **Validation** - Input validation with Bean Validation
+- **Error Handling** - Global exception handler with meaningful error responses
+- **Testing** - Unit and integration tests with high coverage
+- **Documentation** - Swagger/OpenAPI for API exploration
+- **Profiles** - Separate configurations for dev, test, and production
+
+## Configuration
+
+### Environment Variables (Production)
+
+```bash
+export SPRING_DATASOURCE_URL=jdbc:postgresql://db-host:5432/userdb
+export SPRING_DATASOURCE_USERNAME=postgres
+export SPRING_DATASOURCE_PASSWORD=your-secure-password
+export SPRING_PROFILES_ACTIVE=prod
+export SPRING_JPA_HIBERNATE_DDL_AUTO=validate
+```
+
+### Active Profiles
+
+- **default** - PostgreSQL local connection
+- **test** - H2 in-memory database (used for tests)
+- **prod** - Production configuration with validation only
+
+## Troubleshooting
+
+### Docker Port 8080 Already in Use
+
+```bash
+# Find process using port 8080
 lsof -i :8080
-kill -9 <PID>
 
-# Windows (PowerShell)
-netstat -ano | findstr :8080
-taskkill /PID <PID> /F
+# Kill the process
+kill -9 <PID>
 ```
 
-### PostgreSQL connection refused
-```bash
-# Check if container is running
-docker ps | grep postgres
+### PostgreSQL Connection Refused
 
-# If not, start Docker Compose
+```bash
+# Ensure Docker containers are running
 docker-compose up -d
 
-# Verify connection
-docker exec user-api-postgres psql -U postgres -d userdb -c "SELECT 1"
+# Check if PostgreSQL is ready
+docker logs user-api-postgres
+
+# Should see: "database system is ready to accept connections"
 ```
 
-### Tests failing with "password authentication failed"
+### Tests Fail with Connection Error
+
+PostgreSQL must be running before tests:
+
 ```bash
-# Make sure PostgreSQL container is running before tests
 docker-compose up -d
 sleep 5  # Wait for PostgreSQL to be ready
 mvn clean test
 ```
 
-### Cannot find the database migration files
+### Database Schema Not Created
+
+Verify Flyway migrations are in the correct directory:
+
 ```bash
-# Make sure migration directory exists
 ls src/main/resources/db/migration/
-
-# Should contain V1__Create_users_table.sql
+# Should contain: V1__Create_users_table.sql
 ```
 
-### H2 Console not working in production
-H2 is only for tests. Use PostgreSQL in production:
-```properties
-# application.properties (dev)
-spring.h2.console.enabled=true
+## Future Enhancements
 
-# application-prod.properties (prod)
-spring.h2.console.enabled=false
-```
+- [ ] **Auditing** - Automatic tracking of created/updated timestamps
+- [ ] **Pagination** - Paginated results with sorting support
+- [ ] **PATCH** - Support for partial updates
+- [ ] **TestContainers** - Real PostgreSQL in integration tests
+- [ ] **Authentication** - JWT token-based security
+- [ ] **Caching** - Redis for improved performance
 
-## �📝 Contributing
+## License
 
-1. Create feature branch: `git checkout -b feature/xyz`
-2. Make changes
-3. Run tests: `mvn clean test`
-4. Commit: `git commit -m "feat: add xyz"`
-5. Push: `git push origin feature/xyz`
-6. Create Pull Request
-
-## 📄 License
-
-MIT License - See LICENSE file for details
-
-## 👨‍💻 Author
-
-**Marcos** - [GitHub](https://github.com/203marcos)
-
----
+MIT License - See [LICENSE](LICENSE) file for details
 
 
