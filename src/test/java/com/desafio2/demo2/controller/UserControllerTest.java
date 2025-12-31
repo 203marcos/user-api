@@ -101,8 +101,30 @@ class UserControllerTest {
     }
 
     @Test
-    void shouldReturn400WhenValidationFails() throws Exception {
-        UserRequestDTO invalid = new UserRequestDTO("", "not-email");
+    void shouldReturn400WhenNameIsEmpty() throws Exception {
+        UserRequestDTO invalid = new UserRequestDTO("", "valid@email.com");
+
+        mockMvc.perform(post("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(invalid)))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string(containsString("name")));
+    }
+
+    @Test
+    void shouldReturn400WhenEmailIsInvalid() throws Exception {
+        UserRequestDTO invalid = new UserRequestDTO("John", "not-email");
+
+        mockMvc.perform(post("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(invalid)))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string(containsString("email")));
+    }
+
+    @Test
+    void shouldReturn400WhenEmailIsEmpty() throws Exception {
+        UserRequestDTO invalid = new UserRequestDTO("John", "");
 
         mockMvc.perform(post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
