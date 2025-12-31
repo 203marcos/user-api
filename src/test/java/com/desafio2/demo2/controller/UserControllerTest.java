@@ -12,6 +12,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
@@ -25,6 +26,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(UserController.class)
 @Import(ValidationAutoConfiguration.class)
+@ActiveProfiles("test")
 class UserControllerTest {
 
     @Autowired
@@ -52,6 +54,41 @@ class UserControllerTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id", is(1)))
                 .andExpect(jsonPath("$.name", is("Marcos")));
+    }
+
+    @Test
+    void shouldUpdateUser() throws Exception {
+        Long userId = 1L;
+        UserRequestDTO updateRequest = new UserRequestDTO("João Updated", "joao.updated@email.com");
+        UserResponseDTO response = new UserResponseDTO(userId, "João Updated", "joao.updated@email.com");
+
+        when(service.update(eq(userId), any(UserRequestDTO.class))).thenReturn(response);
+
+        mockMvc.perform(put("/users/{id}", userId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updateRequest)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", is(1)))
+                .andExpect(jsonPath("$.name", is("João Updated")))
+                .andExpect(jsonPath("$.email", is("joao.updated@email.com")));
+
+        verify(service).update(eq(userId), any(UserRequestDTO.class));
+    }
+
+    @Test
+    void shouldReturn404WhenUpdatingNonExistent() throws Exception {
+        Long userId = 99L;
+        UserRequestDTO updateRequest = new UserRequestDTO("Test", "test@email.com");
+
+        when(service.update(eq(99L), any(UserRequestDTO.class)))
+                .thenThrow(new UserNotFoundException(99L));
+
+        mockMvc.perform(put("/users/{id}", userId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updateRequest)))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.status", is(404)))
+                .andExpect(jsonPath("$.error", containsString("not found")));
     }
 
     @Test
@@ -87,7 +124,8 @@ class UserControllerTest {
 
         mockMvc.perform(get("/users/99"))
                 .andExpect(status().isNotFound())
-                .andExpect(content().string("User not found with id: 99"));
+                .andExpect(jsonPath("$.status", is(404)))
+                .andExpect(jsonPath("$.error", containsString("not found")));
     }
 
     @Test
