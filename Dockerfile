@@ -6,6 +6,9 @@ WORKDIR /build
 # Copy source code
 COPY . .
 
+# Give permission to execute Maven wrapper
+RUN chmod +x ./mvnw
+
 # Build with Maven (skip tests for faster build)
 RUN ./mvnw clean package -DskipTests
 
