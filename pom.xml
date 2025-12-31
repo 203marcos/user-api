@@ -57,6 +57,18 @@
             <scope>runtime</scope>
         </dependency>
 
+        <!-- Flyway para versionamento de banco -->
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-core</artifactId>
+        </dependency>
+
+        <!-- Suporte PostgreSQL no Flyway -->
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-database-postgresql</artifactId>
+        </dependency>
+
 
         <dependency>
             <groupId>org.springdoc</groupId>
