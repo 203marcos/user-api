@@ -5,8 +5,9 @@ import com.desafio2.demo2.dto.UserResponseDTO;
 import com.desafio2.demo2.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,6 +17,7 @@ import java.util.List;
 @RequestMapping("/users")
 public class UserController {
 
+    private static final Logger logger = LoggerFactory.getLogger(UserController.class);
     private final UserService service;
 
     public UserController(UserService service) {
@@ -23,32 +25,38 @@ public class UserController {
     }
 
     @Operation(summary = "Create a new user")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "User created successfully"),
-            @ApiResponse(responseCode = "400", description = "Invalid input")
-    })
+    @ApiResponse(responseCode = "201", description = "User created")
     @PostMapping
     public ResponseEntity<UserResponseDTO> create(@RequestBody @Valid UserRequestDTO dto) {
+        logger.info("POST /users - Creating user with email: {}", dto.getEmail());
         UserResponseDTO created = service.create(dto);
+        logger.info("User created with id: {}", created.getId());
         return ResponseEntity.status(201).body(created);
-    }
-
-    @Operation(summary = "Get all users")
-    @GetMapping
-    public List<UserResponseDTO> list() {
-        return service.findAll();
     }
 
     @Operation(summary = "Get user by ID")
     @GetMapping("/{id}")
-    public UserResponseDTO findById(@PathVariable Long id) {
-        return service.findById(id);
+    public ResponseEntity<UserResponseDTO> findById(@PathVariable Long id) {
+        logger.info("GET /users/{} - Finding user", id);
+        UserResponseDTO user = service.findById(id);
+        return ResponseEntity.ok(user);
+    }
+
+    @Operation(summary = "Get all users")
+    @GetMapping
+    public ResponseEntity<List<UserResponseDTO>> findAll() {
+        logger.info("GET /users - Fetching all users");
+        List<UserResponseDTO> users = service.findAll();
+        logger.info("Returned {} users", users.size());
+        return ResponseEntity.ok(users);
     }
 
     @Operation(summary = "Delete user by ID")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
+        logger.info("DELETE /users/{} - Deleting user", id);
         service.delete(id);
+        logger.info("User {} deleted successfully", id);
         return ResponseEntity.noContent().build();
     }
 }
