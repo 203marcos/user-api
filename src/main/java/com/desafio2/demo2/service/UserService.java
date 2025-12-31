@@ -48,6 +48,37 @@ public class UserService {
         return new UserResponseDTO(user.getId(), user.getName(), user.getEmail());
     }
 
+    public List<UserResponseDTO> findAll() {
+        logger.info("Fetching all users");
+
+        List<UserResponseDTO> users = repository.findAll()
+                .stream()
+                .map(user -> new UserResponseDTO(user.getId(), user.getName(), user.getEmail()))
+                .collect(Collectors.toList());
+
+        logger.debug("Found {} users", users.size());
+        return users;
+    }
+
+    public UserResponseDTO update(Long id, UserRequestDTO request) {
+        logger.info("Updating user with id: {}", id);
+
+        User user = repository.findById(id)
+                .orElseThrow(() -> {
+                    logger.warn("Cannot update - user not found with id: {}", id);
+                    return new UserNotFoundException(id);
+                });
+
+        user.setName(request.getName());
+        user.setEmail(request.getEmail());
+
+        User updated = repository.save(user);
+
+        logger.debug("User updated with id: {}", id);
+
+        return new UserResponseDTO(updated.getId(), updated.getName(), updated.getEmail());
+    }
+
     public void delete(Long id) {
         logger.info("Deleting user with id: {}", id);
 
@@ -61,15 +92,5 @@ public class UserService {
         logger.info("User deleted successfully with id: {}", id);
     }
 
-    public List<UserResponseDTO> findAll() {
-        logger.info("Fetching all users");
 
-        List<UserResponseDTO> users = repository.findAll()
-                .stream()
-                .map(user -> new UserResponseDTO(user.getId(), user.getName(), user.getEmail()))
-                .collect(Collectors.toList());
-
-        logger.debug("Found {} users", users.size());
-        return users;
-    }
 }

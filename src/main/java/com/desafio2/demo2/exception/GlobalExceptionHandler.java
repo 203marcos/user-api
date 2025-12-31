@@ -14,12 +14,16 @@ import jakarta.servlet.http.HttpServletRequest;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(UserNotFoundException.class)
-    public ResponseEntity<String> handleUserNotFound(
-            UserNotFoundException ex) {
+    public ResponseEntity<ApiError> handleUserNotFound(
+            UserNotFoundException ex,
+            HttpServletRequest request) {
 
+        ApiError body = new ApiError(HttpStatus.NOT_FOUND.value(),
+                ex.getMessage(), request.getRequestURI());
+        
         return ResponseEntity
                 .status(HttpStatus.NOT_FOUND)
-                .body(ex.getMessage());
+                .body(body);
     }
 
         @ExceptionHandler(MethodArgumentNotValidException.class)
