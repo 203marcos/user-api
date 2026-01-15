@@ -31,3 +31,15 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# Logs
+*.log
+
+# macOS
+.DS_Store
+
+# IntelliJ build output
+/out/
+
+# Local environment variables
+.env

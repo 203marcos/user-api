@@ -4,6 +4,9 @@
 
 A production-ready REST API for user management built with Spring Boot 3.3, PostgreSQL, and Docker.
 
+This project was built as a hands-on study to practice backend development, containerization, and cloud-ready deployments using modern Java.
+
+
 ## Getting Started
 
 ### Prerequisites
@@ -178,7 +181,7 @@ docker logs user-api-postgres
 
 ### Tests Fail with Connection Error
 
-PostgreSQL must be running before tests:
+Some integration tests may require PostgreSQL if running outside the test profile.
 
 ```bash
 docker-compose up -d
